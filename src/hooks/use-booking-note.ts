@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
+import { validateNoteInput } from '@/lib/note-validation';
 import { getBookingNote, saveBookingNote } from '@/lib/storage';
 
 export type NoteStatusType = 'idle' | 'success' | 'error';
 
 export function useBookingNote(bookingId: string) {
   const [note, setNote] = useState<string>('');
+  const [savedNote, setSavedNote] = useState<string>('');
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [statusType, setStatusType] = useState<NoteStatusType>('idle');
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -12,14 +14,14 @@ export function useBookingNote(bookingId: string) {
   // Load existing note on mount or when bookingId changes
   useEffect(() => {
     let isMounted = true;
-    setIsLoading(true);
-    setStatusMessage(null);
-    setStatusType('idle');
 
     getBookingNote(bookingId)
-      .then((savedNote) => {
+      .then((existing) => {
         if (isMounted) {
-          setNote(savedNote);
+          setNote(existing);
+          setSavedNote(existing);
+          setStatusMessage(null);
+          setStatusType('idle');
           setIsLoading(false);
         }
       })
@@ -36,33 +38,27 @@ export function useBookingNote(bookingId: string) {
 
   const handleTextChange = useCallback((text: string) => {
     setNote(text);
-    // Clear status message when user edits
     setStatusMessage(null);
     setStatusType('idle');
   }, []);
 
   const handleSave = useCallback(async (): Promise<boolean> => {
-    const trimmed = note.trim();
+    const validation = validateNoteInput(note);
 
-    if (trimmed.length === 0) {
-      setStatusMessage('Enter a note');
-      setStatusType('error');
-      return false;
-    }
-
-    if (note.length > 140) {
-      setStatusMessage('Keep the note under 140 characters');
+    if (!validation.valid) {
+      setStatusMessage(validation.message);
       setStatusType('error');
       return false;
     }
 
     try {
       await saveBookingNote(bookingId, note);
-      setStatusMessage('Note saved');
+      setSavedNote(note);
+      setStatusMessage(validation.message);
       setStatusType('success');
       return true;
     } catch {
-      setStatusMessage('Failed to save note');
+      setStatusMessage('Enter a note');
       setStatusType('error');
       return false;
     }
@@ -74,6 +70,7 @@ export function useBookingNote(bookingId: string) {
     statusMessage,
     statusType,
     isLoading,
+    hasUnsavedChanges: !isLoading && note !== savedNote,
     saveNote: handleSave,
   };
 }

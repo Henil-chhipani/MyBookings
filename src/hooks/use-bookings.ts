@@ -19,6 +19,31 @@ export function useBookings() {
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<string>('');
 
+  useEffect(() => {
+    let isMounted = true;
+    const fetchFn = process.env.EXPO_PUBLIC_API_URL ? fetch : fakeFetch;
+
+    fetchBookings(fetchFn)
+      .then((data) => {
+        if (isMounted) {
+          setBookings(data);
+          setLastUpdated(formatUpdatedTime(new Date()));
+          setIsLoading(false);
+        }
+      })
+      .catch((err) => {
+        if (isMounted) {
+          console.error('Failed to load bookings:', err);
+          setError('Could not load bookings');
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const loadData = useCallback(async (isRefresh = false) => {
     if (isRefresh) {
       setIsRefreshing(true);
@@ -40,10 +65,6 @@ export function useBookings() {
       setIsRefreshing(false);
     }
   }, []);
-
-  useEffect(() => {
-    loadData(false);
-  }, [loadData]);
 
   const refresh = useCallback(() => {
     return loadData(true);
