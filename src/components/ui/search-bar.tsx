@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -37,7 +38,7 @@ export function SearchBar({
           name="search" 
           size={20} 
           color={colors.textMuted} 
-          style={{ marginLeft: Spacing.two }}
+          style={{  marginRight: 5 }}
           />
         <TextInput
           accessibilityLabel="Search bookings"
@@ -56,7 +57,7 @@ export function SearchBar({
             },
           ]}
         />
-        {value.length > 0 && (
+        {value.length > 0 && Platform.OS == 'android' && (
           <Pressable
             accessibilityLabel="Clear search"
             accessibilityRole="button"
