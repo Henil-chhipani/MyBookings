@@ -45,6 +45,33 @@ describe('fetchBookings API client', () => {
     });
   });
 
+  it('filters out rows with invalid or unknown timezone identifiers', async () => {
+    const fixtureWithBadTz = [
+      {
+        id: 'valid-1',
+        title: 'Valid Booking',
+        startsAt: '2026-06-01T15:00:00.000Z',
+        timezone: 'America/New_York',
+      },
+      {
+        id: 'bad-tz',
+        title: 'Invalid Timezone Row',
+        startsAt: '2026-06-01T15:00:00.000Z',
+        timezone: 'Invalid/NonExistent_Zone',
+      },
+    ];
+
+    const stubFetch: typeof fetch = async () =>
+      new Response(JSON.stringify(fixtureWithBadTz), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+    const result = await fetchBookings(stubFetch);
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe('valid-1');
+  });
+
   it('throws (rejects) when receiving an HTTP 500 answer', async () => {
     const stubFetch500: typeof fetch = async () =>
       new Response(JSON.stringify({ error: 'unavailable' }), {
@@ -57,7 +84,15 @@ describe('fetchBookings API client', () => {
   });
 
   describe('fakeFetch integration with EXPO_PUBLIC_BOOKINGS', () => {
-    const originalEnv = process.env.EXPO_PUBLIC_BOOKINGS;
+    const initialEnv = process.env.EXPO_PUBLIC_BOOKINGS;
+
+    afterEach(() => {
+      if (initialEnv === undefined) {
+        delete process.env.EXPO_PUBLIC_BOOKINGS;
+      } else {
+        process.env.EXPO_PUBLIC_BOOKINGS = initialEnv;
+      }
+    });
 
     it('returns empty array when EXPO_PUBLIC_BOOKINGS=empty', async () => {
       process.env.EXPO_PUBLIC_BOOKINGS = 'empty';
@@ -65,7 +100,6 @@ describe('fetchBookings API client', () => {
       expect(response.status).toBe(200);
       const data = await response.json();
       expect(data).toEqual([]);
-      process.env.EXPO_PUBLIC_BOOKINGS = originalEnv;
     });
 
     it('returns HTTP 500 when EXPO_PUBLIC_BOOKINGS=error', async () => {
@@ -74,7 +108,6 @@ describe('fetchBookings API client', () => {
       expect(response.status).toBe(500);
       const data = await response.json();
       expect(data).toEqual({ error: 'unavailable' });
-      process.env.EXPO_PUBLIC_BOOKINGS = originalEnv;
     });
 
     it('returns full fixture when unset', async () => {
@@ -83,7 +116,6 @@ describe('fetchBookings API client', () => {
       expect(response.status).toBe(200);
       const data = await response.json();
       expect(data).toEqual(FAKE_BOOKINGS_FIXTURE);
-      process.env.EXPO_PUBLIC_BOOKINGS = originalEnv;
     });
   });
 });

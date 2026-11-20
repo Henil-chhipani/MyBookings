@@ -1,5 +1,16 @@
 import { Booking } from './types';
-import { fakeFetch } from './fake-server';
+
+function isValidTimezone(tz: unknown): tz is string {
+  if (typeof tz !== 'string' || tz.trim() === '') {
+    return false;
+  }
+  try {
+    Intl.DateTimeFormat(undefined, { timeZone: tz });
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 function isValidBooking(item: unknown): item is Booking {
   if (!item || typeof item !== 'object') {
@@ -20,7 +31,7 @@ function isValidBooking(item: unknown): item is Booking {
   ) {
     return false;
   }
-  if (typeof candidate.timezone !== 'string' || candidate.timezone.trim() === '') {
+  if (!isValidTimezone(candidate.timezone)) {
     return false;
   }
 
@@ -31,15 +42,9 @@ export async function fetchBookings(
   fetchFn: typeof fetch = fetch
 ): Promise<Booking[]> {
   const base = process.env.EXPO_PUBLIC_API_URL?.trim();
-
-  // If EXPO_PUBLIC_API_URL is unset and the default global fetch was passed,
-  // fall back to the in-app fakeFetch so unconfigured calls work gracefully.
-  const resolvedFetch =
-    fetchFn === fetch && !base ? fakeFetch : fetchFn;
-
   const url = base ? `${base.replace(/\/+$/, '')}/bookings` : '/bookings';
 
-  const response = await resolvedFetch(url, {
+  const response = await fetchFn(url, {
     method: 'GET',
     headers: {
       Accept: 'application/json',

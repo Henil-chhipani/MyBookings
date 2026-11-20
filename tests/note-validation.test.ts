@@ -1,18 +1,5 @@
+import { validateNoteInput } from '../src/lib/note-validation';
 import { getNoteStorageKey } from '../src/lib/storage';
-
-export function validateNoteInput(note: string): {
-  valid: boolean;
-  message?: string;
-} {
-  const trimmed = note.trim();
-  if (trimmed.length === 0) {
-    return { valid: false, message: 'Enter a note' };
-  }
-  if (note.length > 140) {
-    return { valid: false, message: 'Keep the note under 140 characters' };
-  }
-  return { valid: true, message: 'Note saved' };
-}
 
 describe('Note validation rules', () => {
   it('stores note under key that includes booking id', () => {
