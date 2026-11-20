@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { Fonts, Spacing } from '@/constants/theme';
@@ -38,6 +39,10 @@ export function StateMessage({ type, message, onRetry }: StateMessageProps) {
         {onRetry && (
           <Button
             label="Try again"
+            variant="primary"
+            icon={({ color, size }) => (
+              <Ionicons name="refresh" size={size} color={color} />
+            )}
             onPress={onRetry}
             style={styles.retryButton}
           />

@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { Fonts, Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { Ionicons } from '@expo/vector-icons';
 
 export interface SearchBarProps {
   value: string;
@@ -24,9 +25,6 @@ export function SearchBar({
 
   return (
     <View style={styles.container}>
-      <Text style={[styles.label, { color: colors.textSecondary }]}>
-        Search bookings
-      </Text>
       <View
         style={[
           styles.inputWrapper,
@@ -35,6 +33,12 @@ export function SearchBar({
             borderColor: colors.border,
           },
         ]}>
+          <Ionicons 
+          name="search" 
+          size={20} 
+          color={colors.textMuted} 
+          style={{ marginLeft: Spacing.two }}
+          />
         <TextInput
           accessibilityLabel="Search bookings"
           accessibilityRole="search"
