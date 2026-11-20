@@ -42,7 +42,9 @@ export async function fetchBookings(
   fetchFn: typeof fetch = fetch
 ): Promise<Booking[]> {
   const base = process.env.EXPO_PUBLIC_API_URL?.trim();
-  const url = base ? `${base.replace(/\/+$/, '')}/bookings` : '/bookings';
+  const url = base
+    ? `${base.replace(/\/+$/, '')}/bookings`
+    : '/bookings';
 
   const response = await fetchFn(url, {
     method: 'GET',

@@ -13,7 +13,8 @@ export function useBooking(id?: string) {
     setIsLoading(true);
     setError(null);
     try {
-      const fetchFn = process.env.EXPO_PUBLIC_API_URL ? fetch : fakeFetch;
+      // can be replace with real fetch when real api added 
+      const fetchFn =  fakeFetch;
       const bookings = await fetchBookings(fetchFn);
       const found = bookings.find((b) => b.id === id);
       if (found) {
