@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  Keyboard,
   Platform,
   Pressable,
   StyleSheet,
@@ -50,6 +51,8 @@ export function SearchBar({
           autoCapitalize="none"
           autoCorrect={false}
           clearButtonMode="while-editing"
+          returnKeyType="search"
+          onSubmitEditing={Keyboard.dismiss}
           style={[
             styles.input,
             {
@@ -57,7 +60,7 @@ export function SearchBar({
             },
           ]}
         />
-        {value.length > 0 && Platform.OS == 'android' && (
+        {value.length > 0 && Platform.OS === 'android' && (
           <Pressable
             accessibilityLabel="Clear search"
             accessibilityRole="button"

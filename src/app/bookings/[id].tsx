@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   BackHandler,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -31,6 +32,7 @@ export default function BookingDetailScreen() {
   const [isCheckedIn, setIsCheckedIn] = useState<boolean>(false);
   const [now, setNow] = useState<Date>(() => new Date());
   const [showExitDialog, setShowExitDialog] = useState<boolean>(false);
+  const scrollViewRef = useRef<React.ElementRef<typeof ScrollView>>(null);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -38,6 +40,20 @@ export default function BookingDetailScreen() {
     }, 10000);
     return () => clearInterval(timer);
   }, []);
+
+  const scrollToBottom = useCallback(() => {
+    setTimeout(() => {
+      scrollViewRef.current?.scrollToEnd({ animated: true });
+    }, 100);
+  }, []);
+
+  // Ensure note field and Save note stay visible on screen when keyboard opens
+  useEffect(() => {
+    const showEvent =
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const subscription = Keyboard.addListener(showEvent, scrollToBottom);
+    return () => subscription.remove();
+  }, [scrollToBottom]);
 
   const {
     note,
@@ -109,12 +125,14 @@ export default function BookingDetailScreen() {
       style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <KeyboardAvoidingView
         style={styles.keyboardAvoider}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 12 : 0}>
+        behavior="padding"
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 16 : 0}>
         <ScrollView
+          ref={scrollViewRef}
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
+          automaticallyAdjustKeyboardInsets={true}
           showsVerticalScrollIndicator={false}>
           <View style={styles.innerContainer}>
             <View style={styles.navigationBar}>
@@ -162,6 +180,7 @@ export default function BookingDetailScreen() {
               statusMessage={statusMessage}
               statusType={statusType}
               onSave={saveNote}
+              onFocus={scrollToBottom}
             />
           </View>
         </ScrollView>
@@ -196,7 +215,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: Spacing.four,
     paddingTop: Spacing.two,
-    paddingBottom: Spacing.six,
+    paddingBottom: Spacing.six + 16,
     flexGrow: 1,
   },
   innerContainer: {

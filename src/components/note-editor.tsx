@@ -12,6 +12,7 @@ export interface NoteEditorProps {
   statusMessage: string | null;
   statusType: NoteStatusType;
   onSave: () => void;
+  onFocus?: () => void;
 }
 
 export function NoteEditor({
@@ -20,6 +21,7 @@ export function NoteEditor({
   statusMessage,
   statusType,
   onSave,
+  onFocus,
 }: NoteEditorProps) {
   const { colors } = useTheme();
 
@@ -52,6 +54,7 @@ export function NoteEditor({
         placeholderTextColor={colors.textMuted}
         value={note}
         onChangeText={onChangeNote}
+        onFocus={onFocus}
         multiline
         numberOfLines={3}
         textAlignVertical="top"
