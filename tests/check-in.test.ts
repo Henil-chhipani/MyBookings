@@ -1,5 +1,5 @@
 import { canCheckIn } from '../src/lib/check-in';
-
+// check in test
 describe('canCheckIn', () => {
   const startsAt = new Date('2026-06-01T15:00:00.000Z');
 

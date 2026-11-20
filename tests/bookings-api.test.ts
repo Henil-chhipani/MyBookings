@@ -1,6 +1,8 @@
 import { fetchBookings } from '../src/api/bookings';
 import { fakeFetch, FAKE_BOOKINGS_FIXTURE } from '../src/api/fake-server';
 
+// Booking api test with fetchBooking fuc
+
 describe('fetchBookings API client', () => {
   it('filters out invalid rows and returns valid bookings when given the 4-row body', async () => {
     const fixture = [
